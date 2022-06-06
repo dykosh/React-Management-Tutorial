@@ -7,6 +7,8 @@ import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 const root_style = {
   width: '100%',
@@ -16,6 +18,9 @@ const root_style = {
 const table_style = {
   minWidth: '1080'
 };
+const progress_style = {
+  margin: 'theme.spacing.unit * 2'
+}
 
 
 // const customers = [
@@ -44,13 +49,25 @@ const table_style = {
 //   'job': '주부'
 //   }
 // ]
+
+
+// Stage of Applying React Library
+// 1) constructor()
+// 2) componentWillMount()
+// 3) render()
+// 4) componentDidMount()
+
+// props or state => shouldComponentUpdate()
+
 class App extends Component{
 
   state = {
-    customers: ""
+    customers: "",
+    completed: 0
   }
 
   componentDidMount(){
+    this.timer = setInterval(this.progress, 20);
     this.callAPI()
       .then(res => this.setState({customers: res}))
       .catch(err => console.log(err));
@@ -61,6 +78,12 @@ class App extends Component{
     const body = await response.json();
     return body;
   }
+
+  progress = () => {
+    const { completed } = this.state;
+    this.setState({ completed: completed >= 100 ? 0 : completed + 1});
+  }
+
   render(){
     const { classes } = this.props;
     return(
@@ -78,7 +101,13 @@ class App extends Component{
           </TableHead>
           <TableBody>
             {this.state.customers ? this.state.customers.map(c => {return (<Customer key={c.id} id={c.id} image={c.image} name={c.name} birthday={c.birthday} gender={c.gender} job={c.job} />);
-            }) : ""}
+            }) : 
+            <TableRow>
+              <TableCell colSpan="6" align="center">
+                <CircularProgress style={progress_style} varaint="determinate" value={this.state.completed}/>
+              </TableCell>
+            </TableRow>
+            }
           </TableBody>
         </Table>
       </Paper>
